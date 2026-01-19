@@ -1,5 +1,6 @@
 "use client";
 
+import { HiPlus, HiDownload, HiDocumentText, HiCurrencyDollar } from "react-icons/hi";
 import { MetricCard, Button } from "@/components/ui";
 
 export default function OverviewPage() {
@@ -19,14 +20,17 @@ export default function OverviewPage() {
         </Button>
       </div>
 
-      <div className="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
-        <div className="flex items-center gap-3">
-          <WalletConnect />
-          <p className="text-sm text-amber-900 dark:text-amber-200">
-            Connect your Flare wallet to sync transactions
-          </p>
+        <div className="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
+          <div className="flex items-center gap-3">
+            <Button variant="primary" size="sm" className="flex items-center gap-2">
+              <HiCurrencyDollar className="w-4 h-4" />
+              Connect Wallet
+            </Button>
+            <p className="text-sm text-amber-900 dark:text-amber-200">
+              Connect your Flare wallet to sync transactions
+            </p>
+          </div>
         </div>
-      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <MetricCard
@@ -61,13 +65,16 @@ export default function OverviewPage() {
             Quick Actions
           </h2>
           <div className="space-y-3">
-            <Button variant="outline" className="w-full justify-start">
+            <Button variant="outline" className="w-full justify-start gap-2">
+              <HiPlus className="w-4 h-4" />
               Import Transactions
             </Button>
-            <Button variant="outline" className="w-full justify-start">
+            <Button variant="outline" className="w-full justify-start gap-2">
+              <HiDocumentText className="w-4 h-4" />
               Generate Records
             </Button>
-            <Button variant="outline" className="w-full justify-start">
+            <Button variant="outline" className="w-full justify-start gap-2">
+              <HiDownload className="w-4 h-4" />
               Export Statement
             </Button>
           </div>
@@ -110,13 +117,5 @@ export default function OverviewPage() {
         </div>
       </div>
     </div>
-  );
-}
-
-function WalletConnect() {
-  return (
-    <Button variant="primary" size="sm">
-      Connect Wallet
-    </Button>
   );
 }

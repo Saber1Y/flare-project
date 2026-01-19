@@ -1,5 +1,6 @@
 "use client";
 
+import { HiShieldCheck } from "react-icons/hi";
 import { Button, Badge, Table, Card, Input } from "@/components/ui";
 
 export default function WalletsPage() {
@@ -164,7 +165,7 @@ export default function WalletsPage() {
 
       <Card className="p-6 mt-6 border-2 border-dashed border-zinc-300 dark:border-zinc-700">
         <div className="text-center py-8">
-          <div className="text-4xl mb-4">🔐</div>
+          <HiShieldCheck className="w-16 h-16 mx-auto mb-4 text-[#e51c56]" />
           <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
             Non-Custodial Security
           </h3>
