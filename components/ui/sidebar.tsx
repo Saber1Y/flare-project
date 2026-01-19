@@ -3,41 +3,61 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { HiChartBar, HiLockClosed, HiCreditCard, HiDocumentText, HiDocument, HiLink, HiCog } from "react-icons/hi";
 
 const navItems = [
-  { label: "Overview", href: "/overview" },
-  { label: "Wallets", href: "/wallets" },
-  { label: "Transactions", href: "/transactions" },
-  { label: "Accounting", href: "/accounting" },
-  { label: "Statements", href: "/statements" },
-  { label: "Proofs", href: "/proofs" },
-  { label: "Settings", href: "/settings" },
+  { label: "Overview", href: "/overview", icon: HiChartBar },
+  { label: "Wallets", href: "/wallets", icon: HiLockClosed },
+  { label: "Transactions", href: "/transactions", icon: HiCreditCard },
+  { label: "Accounting", href: "/accounting", icon: HiDocumentText },
+  { label: "Statements", href: "/statements", icon: HiDocument },
+  { label: "Proofs", href: "/proofs", icon: HiLink },
+  { label: "Settings", href: "/settings", icon: HiCog },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
   return (
-    <aside className="h-screen w-60 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col py-8 px-4">
-      <div className="mb-8 text-2xl font-bold tracking-tight text-black dark:text-zinc-50">
-        Flare Accounting
+    <aside className="h-screen w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col py-6 px-4">
+      <div className="mb-8 px-2">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-[#e51c56] rounded-lg flex items-center justify-center text-white font-bold text-xl">
+            F
+          </div>
+          <div>
+            <div className="text-lg font-bold tracking-tight text-black dark:text-zinc-50">
+              Flare Accounting
+            </div>
+            <div className="text-xs text-zinc-500 dark:text-zinc-400">
+              Accounting-ready payments
+            </div>
+          </div>
+        </div>
       </div>
-      <nav className="flex flex-col gap-2">
+      <nav className="flex flex-col gap-1">
         {navItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
-            className={`rounded-lg px-3 py-2 text-base font-medium transition-colors ${
+            className={`rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 flex items-center gap-3 ${
               pathname === item.href
                 ? "bg-zinc-100 dark:bg-zinc-800 text-black dark:text-zinc-50"
                 : "text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-black dark:hover:text-zinc-50"
             }`}
           >
+            <item.icon className="text-lg" />
             {item.label}
           </Link>
         ))}
       </nav>
-      <div className="mt-auto text-xs text-zinc-400 pt-8">
-        &copy; {new Date().getFullYear()} Flare Accounting
+      <div className="mt-auto pt-6 border-t border-zinc-200 dark:border-zinc-800">
+        <div className="px-3 py-2 text-xs text-zinc-500 dark:text-zinc-400">
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-2 h-2 rounded-full bg-green-500" />
+            <span>System Operational</span>
+          </div>
+          &copy; {new Date().getFullYear()} Flare Accounting
+        </div>
       </div>
     </aside>
   );
