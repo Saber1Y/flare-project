@@ -1,35 +1,49 @@
-import { WagmiProvider, createConfig, http } from 'wagmi'
-import { walletConnect, injected, coinbaseWallet } from 'wagmi/connectors'
-import { flare, flareTestnet } from 'wagmi/chains'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { WagmiProvider, createConfig, http } from "wagmi";
+import { walletConnect, injected, coinbaseWallet } from "wagmi/connectors";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-const projectId = '2cc0cd91791d512142b9f3bae0a9e361'
+const projectId = process.env.NEXT_PUBLIC_PROJECT_ID || "";
 
-const queryClient = new QueryClient()
+const flare = {
+  id: 14,
+  name: "Flare",
+  nativeCurrency: { name: "Flare", symbol: "FLR", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://flare-api.flare.network/ext/C/rpc"] },
+  },
+  blockExplorers: {
+    default: { name: "Flare Explorer", url: "https://flare-explorer.com" },
+  },
+};
 
-const wagmiConfig = createConfig({
+const flareTestnet = {
+  id: 16,
+  name: "Coston Testnet",
+  nativeCurrency: { name: "Coston Flare", symbol: "CFLR", decimals: 18 },
+  rpcUrls: {
+    default: { http: ["https://coston-api.flare.network/ext/C/rpc"] },
+  },
+  blockExplorers: {
+    default: {
+      name: "Coston Explorer",
+      url: "https://coston-explorer.flare.network",
+    },
+  },
+  testnet: true,
+};
+
+export const wagmiConfig = createConfig({
   chains: [flare, flareTestnet],
   connectors: [
     walletConnect({ projectId, showQrModal: true }),
     injected({ shimDisconnect: true }),
     coinbaseWallet({
-      appName: 'Flare Accounting',
-      appLogoUrl: 'https://flare-accounting.com/logo.png'
-    })
+      appName: "Flare Accounting",
+      appLogoUrl: "https://flare-accounting.com/logo.png",
+    }),
   ],
   transports: {
     [flare.id]: http(),
-    [flareTestnet.id]: http()
-  }
-})
-
-export function Providers({ children }: { children: React.ReactNode }) {
-  return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
-    </WagmiProvider>
-  )
-}
-
+    [flareTestnet.id]: http(),
+  },
+});
