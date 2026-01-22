@@ -3,6 +3,7 @@
 import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { wagmiConfig } from './wagmi'
+import { AppKitProvider } from '@reown/appkit/react'
 
 let queryClient: QueryClient;
 
@@ -19,7 +20,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <WagmiProvider config={wagmiConfig} reconnectOnMount={true}>
       <QueryClientProvider client={queryClient}>
-        {children}
+        <AppKitProvider>
+          {children}
+        </AppKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   )

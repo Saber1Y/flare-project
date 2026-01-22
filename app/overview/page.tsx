@@ -1,7 +1,7 @@
 "use client";
 
-import { HiPlus, HiDownload, HiDocumentText, HiCurrencyDollar } from "react-icons/hi";
-import { MetricCard, Button } from "@/components/ui";
+import { HiPlus, HiDownload, HiDocumentText } from "react-icons/hi";
+import { MetricCard, Button, WalletConnect } from "@/components/ui";
 
 export default function OverviewPage() {
   return (
@@ -22,10 +22,7 @@ export default function OverviewPage() {
 
         <div className="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
           <div className="flex items-center gap-3">
-            <Button variant="primary" size="sm" className="flex items-center gap-2">
-              <HiCurrencyDollar className="w-4 h-4" />
-              Connect Wallet
-            </Button>
+            <WalletConnect />
             <p className="text-sm text-amber-900 dark:text-amber-200">
               Connect your Flare wallet to sync transactions
             </p>
