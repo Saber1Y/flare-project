@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Button,
   Badge,
@@ -22,6 +22,24 @@ export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Load data from localStorage on mount
+  useEffect(() => {
+    const savedWallet = localStorage.getItem('flare-wallet-address')
+    const savedTestnet = localStorage.getItem('flare-is-testnet')
+    const savedTransactions = localStorage.getItem('flare-transactions')
+    
+    if (savedWallet) setWalletAddress(savedWallet)
+    if (savedTestnet) setIsTestnet(savedTestnet === 'true')
+    if (savedTransactions) setTransactions(JSON.parse(savedTransactions))
+  }, [])
+
+  // Save to localStorage when data changes
+  useEffect(() => {
+    localStorage.setItem('flare-wallet-address', walletAddress)
+    localStorage.setItem('flare-is-testnet', String(isTestnet))
+    localStorage.setItem('flare-transactions', JSON.stringify(transactions))
+  }, [walletAddress, isTestnet, transactions])
 
   const fetchTransactions = async () => {
     if (!walletAddress) return;
@@ -67,6 +85,70 @@ export default function TransactionsPage() {
     }
   };
 
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedTransactions(filteredTransactions.map(tx => tx.hash));
+    } else {
+      setSelectedTransactions([]);
+    }
+  };
+
+  const handleSelectTransaction = (hash: string, checked: boolean) => {
+    if (checked) {
+      setSelectedTransactions(prev => [...prev, hash]);
+    } else {
+      setSelectedTransactions(prev => prev.filter(h => h !== hash));
+    }
+  };
+
+  const bulkUpdateCategory = async (category: string) => {
+    try {
+      const res = await fetch("/api/transactions/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ hashes: selectedTransactions, category }),
+      });
+
+      if (res.ok) {
+        // Update local state
+        setTransactions((txs) =>
+          txs.map((tx) =>
+            selectedTransactions.includes(tx.hash) ? { ...tx, category } : tx
+          )
+        );
+        setSelectedTransactions([]);
+      }
+    } catch (err: any) {
+      console.error("Failed to bulk update category:", err);
+    }
+  };
+
+  const exportSelected = () => {
+    const selectedTxs = transactions.filter(tx =>
+      selectedTransactions.includes(tx.hash)
+    );
+    
+    const csv = [
+      ['Hash', 'From', 'To', 'Value', 'Category', 'Date'].join(','),
+      ...selectedTxs.map(tx => [
+        tx.hash,
+        tx.from_address,
+        tx.to_address || '',
+        tx.value,
+        tx.category,
+        new Date(tx.timestamp * 1000).toLocaleDateString()
+      ].join(','))
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `transactions-${walletAddress.slice(0,8)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const filteredTransactions = transactions.filter((tx) => {
     const matchesCategory =
       selectedCategory === "all" || tx.category === selectedCategory;
@@ -82,6 +164,7 @@ export default function TransactionsPage() {
   const recorded = transactions.filter((tx) => tx.recorded);
 
   const columns = [
+    { key: "select", header: "", className: "w-10" },
     { key: "hash", header: "Transaction Hash", className: "font-mono text-xs" },
     { key: "date", header: "Date", className: "" },
     { key: "from", header: "From", className: "font-mono text-xs" },
@@ -93,6 +176,14 @@ export default function TransactionsPage() {
   ];
 
   const tableData = filteredTransactions.map((tx) => ({
+    select: (
+      <input
+        type="checkbox"
+        checked={selectedTransactions.includes(tx.hash)}
+        onChange={(e) => handleSelectTransaction(tx.hash, e.target.checked)}
+        className="w-4 h-4 text-[#e51c56] border-zinc-300 rounded focus:ring-[#e51c56]"
+      />
+    ),
     hash: (
       <a
         href={`https://${isTestnet ? "coston-" : ""}flare-explorer.com/tx/${tx.hash}`}
@@ -263,6 +354,8 @@ export default function TransactionsPage() {
               <input
                 type="checkbox"
                 id="select-all"
+                checked={selectedTransactions.length > 0 && selectedTransactions.length === filteredTransactions.length}
+                onChange={(e) => handleSelectAll(e.target.checked)}
                 className="w-4 h-4 text-[#e51c56] border-zinc-300 rounded focus:ring-[#e51c56]"
               />
               <label
@@ -276,10 +369,23 @@ export default function TransactionsPage() {
                   <span className="text-sm text-zinc-600 dark:text-zinc-400">
                     {selectedTransactions.length} selected
                   </span>
-                  <Button variant="primary" size="sm" disabled>
-                    Generate Records
-                  </Button>
-                  <Button variant="outline" size="sm" disabled>
+                  <select
+                    onChange={(e) => {
+                      if (e.target.value) {
+                        bulkUpdateCategory(e.target.value);
+                        e.target.value = '';
+                      }
+                    }}
+                    className="text-sm border border-zinc-300 dark:border-zinc-700 rounded px-2 py-1 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                  >
+                    <option value="">Bulk Set Category</option>
+                    <option value="income">Income</option>
+                    <option value="expense">Expense</option>
+                    <option value="payroll">Payroll</option>
+                    <option value="treasury">Treasury</option>
+                    <option value="uncategorized">Uncategorized</option>
+                  </select>
+                  <Button variant="outline" size="sm" onClick={exportSelected}>
                     Export Selected
                   </Button>
                 </div>
@@ -298,8 +404,7 @@ export default function TransactionsPage() {
             Transactions&apos; to get started
           </p>
           <p className="text-sm text-zinc-500 dark:text-zinc-500">
-            We&apos;ll fetch the last 100 blocks and find all transactions
-            involving that wallet
+            We&apos;ll fetch all transactions involving that wallet
           </p>
         </div>
       )}

@@ -1,9 +1,17 @@
-"use client"
+"use client";
 
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { HiChartBar, HiLockClosed, HiCreditCard, HiDocumentText, HiDocument, HiLink, HiCog } from "react-icons/hi";
+import {
+  HiChartBar,
+  HiLockClosed,
+  HiCreditCard,
+  HiDocumentText,
+  HiDocument,
+  HiLink,
+  HiCog,
+} from "react-icons/hi";
 
 const navItems = [
   { label: "Overview", href: "/overview", icon: HiChartBar },
@@ -18,7 +26,7 @@ const navItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   return (
-    <aside className="h-screen w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col py-6 px-4">
+    <aside className="max-h-full w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col py-6 px-4">
       <div className="mb-8 px-2">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-[#e51c56] rounded-lg flex items-center justify-center text-white font-bold text-xl">
