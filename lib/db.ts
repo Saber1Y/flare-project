@@ -99,4 +99,59 @@ export function getTransactionByHash(hash: string): Transaction | undefined {
   return stmt.get(hash) as Transaction | undefined
 }
 
+export interface Proof {
+  id?: number
+  txHash: string
+  receiptId: string
+  isoType: string
+  recordHash?: string
+  anchorTxHash?: string
+  status: string
+  createdAt: string
+}
+
+db.exec(`
+  CREATE TABLE IF NOT EXISTS proofs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    txHash TEXT NOT NULL,
+    receiptId TEXT NOT NULL,
+    isoType TEXT DEFAULT 'payment',
+    recordHash TEXT,
+    anchorTxHash TEXT,
+    status TEXT DEFAULT 'pending',
+    createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (txHash) REFERENCES transactions(hash)
+  );
+`)
+
+export function upsertProof(proof: Proof) {
+  const stmt = db.prepare(`
+    INSERT OR REPLACE INTO proofs 
+    (txHash, receiptId, isoType, recordHash, anchorTxHash, status)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `)
+  return stmt.run(
+    proof.txHash,
+    proof.receiptId,
+    proof.isoType,
+    proof.recordHash,
+    proof.anchorTxHash,
+    proof.status
+  )
+}
+
+export function getProofByTxHash(txHash: string): Proof | undefined {
+  const stmt = db.prepare('SELECT * FROM proofs WHERE txHash = ?')
+  return stmt.get(txHash) as Proof | undefined
+}
+
+export function markProofAsAnchored(receiptId: string, anchorTxHash: string, recordHash: string) {
+  const stmt = db.prepare(`
+    UPDATE proofs 
+    SET status = 'anchored', anchorTxHash = ?, recordHash = ?
+    WHERE receiptId = ?
+  `)
+  return stmt.run(anchorTxHash, recordHash, receiptId)
+}
+
 export default db
