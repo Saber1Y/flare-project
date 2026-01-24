@@ -80,14 +80,14 @@ export default function OverviewPage() {
           value={stats.totalTransactions.toLocaleString()}
           change={`${stats.totalTransactions} this period`}
           trend="neutral"
-          icon={HiChartBar}
+          icon={<HiChartBar />}
         />
         <MetricCard
           title="Recorded Proofs"
           value={stats.recordedTransactions.toLocaleString()}
           change={`${recordingRate}% of total`}
           trend={recordingRate > 50 ? "up" : "neutral"}
-          icon={HiDocumentText}
+          icon={<HiDocumentText />}
         />
         <MetricCard
           title="Total Volume"

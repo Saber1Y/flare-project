@@ -192,9 +192,9 @@ export default function ProofsPage() {
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-64"
             />
-            <Button variant="outline" href="/transactions">
+            {/* <Button variant="outline" href="/transactions">
               Generate New Proof
-            </Button>
+            </Button> */}
           </div>
         </div>
         
