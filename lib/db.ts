@@ -145,6 +145,11 @@ export function getProofByTxHash(txHash: string): Proof | undefined {
   return stmt.get(txHash) as Proof | undefined
 }
 
+export function getProofByReceiptId(receiptId: string): Proof | undefined {
+  const stmt = db.prepare('SELECT * FROM proofs WHERE receiptId = ?')
+  return stmt.get(receiptId) as Proof | undefined
+}
+
 export function markProofAsAnchored(receiptId: string, anchorTxHash: string, recordHash: string) {
   const stmt = db.prepare(`
     UPDATE proofs 

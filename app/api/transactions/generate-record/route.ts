@@ -58,7 +58,8 @@ export async function POST(request: NextRequest) {
       txHash: tx.hash,
       receiptId: receipt.id,
       isoType: "payment",
-      status: receipt.status || "anchored"
+      status: receipt.status || "anchored",
+      createdAt: new Date().toISOString()
     });
 
     // Mark transaction as recorded
