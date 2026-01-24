@@ -14,13 +14,9 @@ import {
 } from "react-icons/hi";
 
 const navItems = [
-  { label: "Overview", href: "/overview", icon: HiChartBar },
-  { label: "Wallets", href: "/wallets", icon: HiLockClosed },
+  { label: "Dashboard", href: "/overview", icon: HiChartBar },
   { label: "Transactions", href: "/transactions", icon: HiCreditCard },
-  { label: "Accounting", href: "/accounting", icon: HiDocumentText },
-  { label: "Statements", href: "/statements", icon: HiDocument },
   { label: "Proofs", href: "/proofs", icon: HiLink },
-  { label: "Settings", href: "/settings", icon: HiCog },
 ];
 
 export default function Sidebar() {
