@@ -20,6 +20,10 @@ export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [generateModalOpen, setGenerateModalOpen] = useState(false);
+  const [selectedTxForProof, setSelectedTxForProof] = useState<any>(null);
+  const [proofDescription, setProofDescription] = useState("");
+  const [generatingProof, setGeneratingProof] = useState(false);
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -84,19 +88,33 @@ export default function TransactionsPage() {
   };
 
   const generateProof = async (tx: any) => {
+    console.log("generateProof function called with tx:", tx);
     setGeneratingProof(true);
     try {
+      const requestBody = {
+        hash: tx.hash,
+        description: proofDescription || tx.category || "Payment"
+      };
+      console.log("Sending request to /api/transactions/generate-record:", requestBody);
+
+      // Create AbortController for extended timeout
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 150000); // 2.5 minutes
+
       const res = await fetch("/api/transactions/generate-record", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          hash: tx.hash,
-          description: tx.category || "Payment"
-        }),
+        body: JSON.stringify(requestBody),
+        signal: controller.signal
       });
 
+      clearTimeout(timeoutId);
+
+      console.log("Response status:", res.status);
+      const data = await res.json();
+      console.log("Response data:", data);
+
       if (res.ok) {
-        const data = await res.json();
         // Update transaction to recorded state
         setTransactions((txs) =>
           txs.map((t) =>
@@ -109,6 +127,9 @@ export default function TransactionsPage() {
       }
     } catch (err: any) {
       console.error("Failed to generate proof:", err);
+      if (err.name === 'AbortError') {
+        console.error("Request timed out after 2.5 minutes");
+      }
     } finally {
       setGeneratingProof(false);
     }
@@ -262,8 +283,11 @@ export default function TransactionsPage() {
             variant="outline"
             size="sm"
             onClick={() => {
+              console.log("Generate Record clicked for tx:", tx);
               setSelectedTxForProof(tx);
               setProofDescription(tx.category || "Payment");
+              // Call generateProof directly
+              generateProof(tx);
             }}
           >
             Generate Record

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getTransactionByHash, upsertProof, markProofAsAnchored } from "@/lib/db";
 import ProofRails from "@proofrails/sdk";
+import db from "@/lib/db";
 
 export async function POST(request: NextRequest) {
   try {
@@ -23,7 +24,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Initialize ProofRails SDK
+    // Initialize ProofRails SDK with increased timeout
     const apiKey = process.env.PROOFRAILS_API_KEY || "";
     if (!apiKey) {
       return NextResponse.json(
@@ -32,12 +33,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log(" Connecting to ProofRails with increased timeout...");
+    
     const proofrails = new ProofRails({
       apiKey,
-      network: tx.value > "0" ? "flare" : "coston2"
+      network: tx.value > "0" ? "flare" : "coston2",
+      timeout: 120000 // 2 minutes timeout
     });
 
     // Create ISO 20022 payment receipt
+    console.log(" Creating ISO 20022 payment receipt...");
     const receipt = await proofrails.templates.payment({
       amount: parseFloat(tx.value),
       from: tx.from_address,
@@ -46,12 +51,14 @@ export async function POST(request: NextRequest) {
       transactionHash: tx.hash
     });
 
+    console.log(" ProofRails receipt created:", receipt.id);
+
     // Store proof in database
     upsertProof({
       txHash: tx.hash,
       receiptId: receipt.id,
       isoType: "payment",
-      status: "anchored"
+      status: receipt.status || "anchored"
     });
 
     // Mark transaction as recorded
