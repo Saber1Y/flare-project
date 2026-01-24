@@ -51,16 +51,21 @@ export async function POST(request: NextRequest) {
       transactionHash: tx.hash
     });
 
-    console.log(" ProofRails receipt created:", receipt.id);
+    console.log(" ProofRails receipt created:", receipt.id, "status:", receipt.status);
 
-    // Store proof in database
+    // Store proof in database with actual status from ProofRails
     upsertProof({
       txHash: tx.hash,
       receiptId: receipt.id,
       isoType: "payment",
-      status: receipt.status || "anchored",
+      status: receipt.status || "pending",
       createdAt: new Date().toISOString()
     });
+
+    // If anchor transaction exists, mark as anchored
+    if (receipt.anchorTx && receipt.recordHash) {
+      markProofAsAnchored(receipt.id, receipt.anchorTx, receipt.recordHash);
+    }
 
     // Mark transaction as recorded
     const markAsRecordedStmt = db.prepare(`

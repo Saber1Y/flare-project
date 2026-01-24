@@ -9,29 +9,58 @@ export default function ProofPage() {
   const receiptId = params.id as string;
   const [proofData, setProofData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchProofData = async (shouldRefresh = false) => {
+    try {
+      const res = await fetch(`/api/proof/${receiptId}`);
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      const data = await res.json();
+
+      if (data.error) {
+        console.error("API Error:", data.error);
+      } else {
+        setProofData(data.proof);
+        
+        // If proof is still pending and we haven't tried refreshing, try to refresh status
+        if (data.proof?.status === 'pending' && !shouldRefresh) {
+          await refreshProofStatus();
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching proof:", error);
+      setProofData(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refreshProofStatus = async () => {
+    setRefreshing(true);
+    try {
+      const res = await fetch('/api/proof/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ receiptId })
+      });
+      
+      if (res.ok) {
+        const refreshData = await res.json();
+        console.log("Proof status refreshed:", refreshData);
+        
+        // Fetch updated proof data
+        await fetchProofData(true);
+      }
+    } catch (error) {
+      console.error("Error refreshing proof status:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProofData = async () => {
-      try {
-        const res = await fetch(`/api/proof/${receiptId}`);
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        const data = await res.json();
-
-        if (data.error) {
-          console.error("API Error:", data.error);
-        } else {
-          setProofData(data.proof);
-        }
-      } catch (error) {
-        console.error("Error fetching proof:", error);
-        setProofData(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     if (receiptId) {
       fetchProofData();
     }
@@ -57,10 +86,12 @@ export default function ProofPage() {
             Proof Not Found
           </h1>
           <p className="text-zinc-600 dark:text-zinc-400 mb-6">
-            The proof you&apos;re looking for doesn&apos;t exist or
-            couldn&apos;t be loaded.
+            The proof you're looking for doesn't exist or couldn't be loaded.
           </p>
-          <Button variant="primary" onClick={() => window.history.back()}>
+          <Button
+            variant="primary"
+            onClick={() => window.history.back()}
+          >
             Go Back
           </Button>
         </div>
@@ -86,66 +117,126 @@ export default function ProofPage() {
               <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-100">
                 Proof Details
               </h2>
-              <Badge variant="recorded">{proofData.status}</Badge>
+              <Badge variant="recorded">
+                {proofData.status}
+              </Badge>
             </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div>
+                 <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                   Receipt ID
+                 </h3>
+                 <p className="text-zinc-900 dark:text-zinc-100 font-mono text-sm">
+                   {proofData.id}
+                 </p>
+               </div>
+               
+               <div>
+                 <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                   ISO Type
+                 </h3>
+                 <p className="text-zinc-900 dark:text-zinc-100">
+                   {proofData.isoType?.toUpperCase()}
+                 </p>
+               </div>
+               
+               <div>
+                 <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                   Network
+                 </h3>
+                 <p className="text-zinc-900 dark:text-zinc-100 capitalize">
+                   {proofData.network}
+                    ({proofData.network === 'flare' ? 'Mainnet' : 'Testnet'})
+                 </p>
+               </div>
+               
+               <div>
+                 <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                   Created
+                 </h3>
+                 <p className="text-zinc-900 dark:text-zinc-100">
+                   {new Date(proofData.createdAt).toLocaleString()}
+                 </p>
+               </div>
+               
+               {proofData.recordHash && (
+                 <div>
+                   <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                     Record Hash
+                   </h3>
+                   <p className="text-zinc-900 dark:text-zinc-100 font-mono text-sm">
+                     {proofData.recordHash.slice(0, 10)}...{proofData.recordHash.slice(-8)}
+                   </p>
+                 </div>
+               )}
+               
+               <div>
+                 <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                   Block Number
+                 </h3>
+                 <p className="text-zinc-900 dark:text-zinc-100">
+                   #{proofData.blockNumber}
+                 </p>
+               </div>
+             </div>
+          </div>
 
+          <div className="border-t border-zinc-200 dark:border-zinc-800 pt-6 mb-6">
+            <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+              ISO 20022 Evidence
+            </h3>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                  Receipt ID
-                </h3>
+                <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                  ISO Message Type
+                </h4>
+                <p className="text-zinc-900 dark:text-zinc-100">
+                  camt.053 (Bank-To-Customer Statement)
+                </p>
+              </div>
+              
+              <div>
+                <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                  Record Hash
+                </h4>
                 <p className="text-zinc-900 dark:text-zinc-100 font-mono text-sm">
-                  {proofData.id}
+                  {proofData.recordHash || 'Generating...'}
                 </p>
               </div>
-
-              <div>
-                <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                  ISO Type
-                </h3>
-                <p className="text-zinc-900 dark:text-zinc-100">
-                  {proofData.isoType?.toUpperCase()}
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                  Network
-                </h3>
-                <p className="text-zinc-900 dark:text-zinc-100 capitalize">
-                  {proofData.network} (
-                  {proofData.network === "flare" ? "Mainnet" : "Testnet"})
-                </p>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                  Created
-                </h3>
-                <p className="text-zinc-900 dark:text-zinc-100">
-                  {new Date(proofData.createdAt).toLocaleString()}
-                </p>
-              </div>
-
-              {proofData.recordHash && (
-                <div>
-                  <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                    Record Hash
-                  </h3>
-                  <p className="text-zinc-900 dark:text-zinc-100 font-mono text-sm">
-                    {proofData.recordHash.slice(0, 10)}...
-                    {proofData.recordHash.slice(-8)}
-                  </p>
+              
+              <div className="md:col-span-2">
+                <h4 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                  ISO 20022 XML
+                </h4>
+                <div className="bg-zinc-50 dark:bg-zinc-900 p-4 rounded-lg">
+                  <pre className="text-xs overflow-x-auto text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">
+                    {`<!-- ISO 20022 camt.053 Bank Statement -->
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.08">
+  <BkToCstmrStmt>
+    <Stmt>
+      <Id>STATEMENT-${proofData.id}</Id>
+      <CreDtTm>${new Date(proofData.createdAt).toISOString()}</CreDtTm>
+      <Ntry>
+        <Amt Ccy="FLR">${proofData.amount}</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <BookgDt>
+          <Dt>${new Date(proofData.createdAt).toISOString().split('T')[0]}</Dt>
+        </BookgDt>
+        <RltdPties>
+          <Dbtr><Nm>${proofData.from}</Nm></Dbtr>
+          <Cdtr><Nm>${proofData.to}</Nm></Cdtr>
+        </RltdPties>
+        <RmtInf>
+          <Ustrd>${proofData.purpose}</Ustrd>
+        </RmtInf>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>`}
+                  </pre>
                 </div>
-              )}
-
-              <div>
-                <h3 className="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                  Block Number
-                </h3>
-                <p className="text-zinc-900 dark:text-zinc-100">
-                  #{proofData.blockNumber}
-                </p>
               </div>
             </div>
           </div>
@@ -246,12 +337,60 @@ export default function ProofPage() {
                   Verification Status
                 </h3>
                 <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                  This proof has been cryptographically anchored on the Flare
-                  blockchain
+                  {proofData.status === 'anchored' 
+                    ? 'This proof has been cryptographically anchored on the Flare blockchain'
+                    : proofData.status === 'failed' 
+                    ? 'This proof generation failed. You can try refreshing the status.'
+                    : proofData.status === 'pending'
+                    ? 'This proof is being generated and will be anchored shortly.'
+                    : `Proof status: ${proofData.status}`
+                  }
                 </p>
               </div>
 
-              <div className="flex gap-3">
+              <div className="flex gap-3 flex-wrap">
+                {(proofData.status === 'pending' || proofData.status === 'failed') && (
+                  <Button
+                    variant="outline"
+                    onClick={refreshProofStatus}
+                    disabled={refreshing}
+                  >
+                    {refreshing ? 'Refreshing...' : 'Refresh Status'}
+                  </Button>
+                )}
+                <Button variant="outline" onClick={() => {
+                  // Download ISO XML
+                  const isoXml = `<?xml version="1.0" encoding="UTF-8"?>
+<Document xmlns="urn:iso:std:iso:20022:tech:xsd:camt.053.001.08">
+  <BkToCstmrStmt>
+    <Stmt>
+      <Id>STATEMENT-${proofData.id}</Id>
+      <CreDtTm>${new Date(proofData.createdAt).toISOString()}</CreDtTm>
+      <Ntry>
+        <Amt Ccy="FLR">${proofData.amount}</Amt>
+        <CdtDbtInd>DBIT</CdtDbtInd>
+        <BookgDt>
+          <Dt>${new Date(proofData.createdAt).toISOString().split('T')[0]}</Dt>
+        </BookgDt>
+        <RltdPties>
+          <Dbtr><Nm>${proofData.from}</Nm></Dbtr>
+          <Cdtr><Nm>${proofData.to}</Nm></Cdtr>
+        </RltdPties>
+        <RmtInf>
+          <Ustrd>${proofData.purpose}</Ustrd>
+        </RmtInf>
+      </Ntry>
+    </Stmt>
+  </BkToCstmrStmt>
+</Document>`;
+                  const dataUri = 'data:application/xml;charset=utf-8,' + encodeURIComponent(isoXml);
+                  const linkElement = document.createElement("a");
+                  linkElement.setAttribute("href", dataUri);
+                  linkElement.setAttribute("download", `iso-20022-${receiptId}.xml`);
+                  linkElement.click();
+                }}>
+                  Download ISO XML
+                </Button>
                 <Button variant="outline" onClick={() => window.print()}>
                   Print Proof
                 </Button>

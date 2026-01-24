@@ -33,8 +33,8 @@ export async function GET(
       );
     }
 
-    // Determine network based on transaction value (as in generate-record route)
-    const network = transaction.value > "0" ? "flare" : "coston2";
+    // Use stored network, fallback to detection for existing data
+    const network = transaction.network || (transaction.value > "0" ? "flare" : "coston2");
 
     return NextResponse.json({
       success: true,

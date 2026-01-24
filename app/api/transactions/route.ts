@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
         timestamp: tx.timestamp,
         category: "uncategorized",
         recorded: false,
+        network: testnet ? "coston2" : "flare"
       });
     }
 

@@ -18,6 +18,7 @@ db.exec(`
     category TEXT DEFAULT 'uncategorized',
     recorded BOOLEAN DEFAULT 0,
     proof_id TEXT,
+    network TEXT DEFAULT 'coston2',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
@@ -41,6 +42,7 @@ export interface Transaction {
   category: string
   recorded: boolean
   proof_id?: string
+  network?: string
   created_at?: string
   updated_at?: string
 }
@@ -48,8 +50,8 @@ export interface Transaction {
 export function upsertTransaction(tx: Transaction) {
   const stmt = db.prepare(`
     INSERT OR REPLACE INTO transactions 
-    (hash, from_address, to_address, value, block_number, timestamp, gas_used, gas_price, category, recorded, proof_id)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    (hash, from_address, to_address, value, block_number, timestamp, gas_used, gas_price, category, recorded, proof_id, network)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `)
   return stmt.run(
     tx.hash,
@@ -62,7 +64,8 @@ export function upsertTransaction(tx: Transaction) {
     tx.gas_price,
     tx.category,
     tx.recorded ? 1 : 0,
-    tx.proof_id
+    tx.proof_id,
+    tx.network || 'coston2'
   )
 }
 
@@ -146,7 +149,7 @@ export function getProofByTxHash(txHash: string): Proof | undefined {
 }
 
 export function getProofByReceiptId(receiptId: string): Proof | undefined {
-  const stmt = db.prepare('SELECT * FROM proofs WHERE receiptId = ?')
+  const stmt = db.prepare('SELECT * FROM proofs WHERE receiptId = ? ORDER BY createdAt DESC LIMIT 1')
   return stmt.get(receiptId) as Proof | undefined
 }
 
