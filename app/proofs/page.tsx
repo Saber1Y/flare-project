@@ -19,6 +19,7 @@ export default function ProofsPage() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchProofs = async () => {
@@ -69,6 +70,33 @@ export default function ProofsPage() {
     { key: "status", header: "Status", className: "" },
     { key: "actions", header: "", className: "text-right" }
   ];
+
+  const exportAllProofs = async () => {
+    try {
+      const csvContent = [
+        'Receipt ID,Transaction Hash,Amount,Category,Created,Status',
+        ...proofs.map(p => 
+          `"${p.receiptId}","${p.txHash}","${p.amount}","${p.category}","${new Date(p.createdAt).toLocaleDateString()}","${p.status}"`
+        )
+      ].join('\n');
+      
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `iso-proofs-${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Export failed:', error);
+    }
+  };
+
+  const showSharingGuide = () => {
+    setShowModal(true);
+  };
 
   const tableData = filteredProofs.map((proof) => ({
     receiptId: (
@@ -126,7 +154,36 @@ export default function ProofsPage() {
   const anchoredCount = proofs.filter(p => p.status === 'anchored').length;
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <>
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-zinc-900 rounded-lg max-w-2xl w-full p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+                Share ISO 20022 Proofs
+              </h3>
+              <button 
+                onClick={() => setShowModal(false)}
+                className="text-zinc-400 hover:text-zinc-600"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="space-y-4 text-sm text-zinc-600 dark:text-zinc-400">
+              <p><strong>For Accountants:</strong> Share proof links from the Proofs page. Accountants can verify transactions and download ISO XML without wallet access.</p>
+              <p><strong>For Auditors:</strong> Each proof contains cryptographically verifiable ISO 20022 data anchored on Flare blockchain.</p>
+              <p><strong>Step 1:</strong> Copy proof URL from Proofs page</p>
+              <p><strong>Step 2:</strong> Share with accountant/auditor</p>
+              <p><strong>Step 3:</strong> They verify transaction authenticity and download ISO 20022 records</p>
+              <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded p-3 mt-4">
+                <p className="text-green-900 dark:text-green-200 font-medium">✅ Read-only access maintains security while providing full audit trail</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div className="max-w-7xl mx-auto">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
           ISO 20022 Proofs
@@ -226,17 +283,18 @@ export default function ProofsPage() {
             Share read-only proof links with accountants. They can verify transactions and download ISO 20022 records without needing wallet access.
           </p>
           <div className="flex items-center gap-3 justify-center">
-            <Button variant="outline">
+            <Button variant="outline" onClick={exportAllProofs}>
               <HiDownload className="w-4 h-4 mr-2" />
               Export All Proofs
             </Button>
-            <Button variant="primary">
+            <Button variant="primary" onClick={showSharingGuide}>
               <HiLink className="w-4 h-4 mr-2" />
               Sharing Guide
             </Button>
           </div>
         </div>
       </Card>
-    </div>
+      </div>
+    </>
   );
 }
