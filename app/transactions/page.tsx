@@ -295,7 +295,7 @@ export default function TransactionsPage() {
         )}
         {tx.recorded && tx.proof_id && (
           <a
-            href={`https://proofrails.xyz/receipt/${tx.proof_id}`}
+            href={`/proof/${tx.proof_id}`}
             target="_blank"
             rel="noopener noreferrer"
           >
