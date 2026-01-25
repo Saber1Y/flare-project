@@ -1,17 +1,10 @@
 "use client";
 
-import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  HiChartBar,
-  HiLockClosed,
-  HiCreditCard,
-  HiDocumentText,
-  HiDocument,
-  HiLink,
-  HiCog,
-} from "react-icons/hi";
+import { HiChartBar, HiCreditCard, HiLink } from "react-icons/hi";
+import Image from "next/image";
+import logo from "@/public/logo.jpeg"
 
 const navItems = [
   { label: "Dashboard", href: "/overview", icon: HiChartBar },
@@ -25,10 +18,8 @@ export default function Sidebar() {
     <aside className="max-h-full w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col py-6 px-4">
       <div className="mb-8 px-2">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#e51c56] rounded-lg flex items-center justify-center text-white font-bold text-xl">
-            F
-          </div>
           <div>
+            <Image src={logo} width={100} height={100} alt="logo" />
             <div className="text-lg font-bold tracking-tight text-black dark:text-zinc-50">
               Flare Accounting
             </div>
