@@ -310,23 +310,25 @@ export default function TransactionsPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
             Transactions
           </h1>
-          <p className="text-zinc-600 dark:text-zinc-400">
+          <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400">
             Manage and categorize your Flare transactions
           </p>
         </div>
-        <WalletConnect />
+        <div className="flex-shrink-0">
+          <WalletConnect />
+        </div>
       </div>
 
       <Card className="p-6 mb-6">
         <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
           Fetch Transactions
         </h2>
-        <div className="flex flex-col lg:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1">
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
               Wallet Address
@@ -337,7 +339,7 @@ export default function TransactionsPage() {
               onChange={(e) => setWalletAddress(e.target.value)}
             />
           </div>
-          <div className="w-full lg:w-48">
+          <div className="w-full sm:w-48">
             <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">
               Network
             </label>
@@ -354,7 +356,7 @@ export default function TransactionsPage() {
               variant="primary"
               onClick={fetchTransactions}
               disabled={!walletAddress || loading}
-              className="w-full lg:w-auto"
+              className="w-full sm:w-auto"
             >
               {loading ? "Fetching..." : "Fetch Transactions"}
             </Button>
@@ -391,8 +393,8 @@ export default function TransactionsPage() {
             </div>
           </div>
 
-          <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6">
-            <div className="flex flex-col lg:flex-row gap-4 mb-6">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
               <div className="flex-1">
                 <Input
                   placeholder="Search by hash, address, or amount..."
@@ -400,7 +402,7 @@ export default function TransactionsPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
-              <div className="w-full lg:w-48">
+              <div className="w-full sm:w-48">
                 <Select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
@@ -415,27 +417,29 @@ export default function TransactionsPage() {
               </div>
             </div>
 
-            <div className="mb-4 flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="select-all"
-                  checked={selectedTransactions.length > 0 && selectedTransactions.length === filteredTransactions.length}
-                  onChange={(e) => handleSelectAll(e.target.checked)}
-                  className="w-4 h-4 text-[#e51c56] border-zinc-300 rounded focus:ring-[#e51c56]"
-                />
-                <label
-                  htmlFor="select-all"
-                  className="text-sm text-zinc-600 dark:text-zinc-400"
-                >
-                  Select All
-                </label>
+            <div className="mb-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="select-all"
+                    checked={selectedTransactions.length > 0 && selectedTransactions.length === filteredTransactions.length}
+                    onChange={(e) => handleSelectAll(e.target.checked)}
+                    className="w-4 h-4 text-[#e51c56] border-zinc-300 rounded focus:ring-[#e51c56]"
+                  />
+                  <label
+                    htmlFor="select-all"
+                    className="text-sm text-zinc-600 dark:text-zinc-400"
+                  >
+                    Select All
+                  </label>
+                </div>
                 {selectedTransactions.length > 0 && (
-                  <div className="flex items-center gap-2 ml-auto">
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:ml-auto">
                     <span className="text-sm text-zinc-600 dark:text-zinc-400">
                       {selectedTransactions.length} selected
                     </span>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <select
                         onChange={(e) => {
                           if (e.target.value) {
@@ -443,7 +447,7 @@ export default function TransactionsPage() {
                             e.target.value = '';
                           }
                         }}
-                        className="text-sm border border-zinc-300 dark:border-zinc-700 rounded px-2 py-1 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100"
+                        className="text-sm border border-zinc-300 dark:border-zinc-700 rounded px-2 py-1 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 w-full sm:w-auto"
                       >
                         <option value="">Bulk Set Category</option>
                         <option value="income">Income</option>
@@ -452,7 +456,7 @@ export default function TransactionsPage() {
                         <option value="treasury">Treasury</option>
                         <option value="uncategorized">Uncategorized</option>
                       </select>
-                      <Button variant="outline" size="sm" onClick={exportSelected}>
+                      <Button variant="outline" size="sm" onClick={exportSelected} className="w-full sm:w-auto">
                         Export Selected
                       </Button>
                     </div>
@@ -467,11 +471,11 @@ export default function TransactionsPage() {
       )}
 
       {transactions.length === 0 && !loading && walletAddress && (
-        <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-12 text-center">
-          <p className="text-zinc-600 dark:text-zinc-400 mb-4">
+        <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 sm:p-12 text-center">
+          <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 mb-4">
             Enter a wallet address above and click "Fetch Transactions" to get started
           </p>
-          <p className="text-sm text-zinc-500 dark:text-zinc-500">
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-500">
             We&apos;ll fetch all transactions involving that wallet
           </p>
         </div>

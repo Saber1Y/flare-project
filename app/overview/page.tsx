@@ -49,16 +49,16 @@ export default function OverviewPage() {
 
   return (
     <div className="max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
             Dashboard
           </h1>
-          <p className="text-zinc-600 dark:text-zinc-400">
+          <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400">
             ISO 20022 Payment System Overview
           </p>
         </div>
-        <div className="text-sm text-zinc-500 dark:text-zinc-400">
+        <div className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400">
           Last updated: {new Date().toLocaleString()}
         </div>
       </div> 
