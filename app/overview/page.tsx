@@ -65,8 +65,10 @@ export default function OverviewPage() {
 
       {!stats.totalTransactions ? (
         <div className="mb-6 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg p-4">
-          <div className="flex items-center gap-3">
-            <WalletConnect />
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex-shrink-0">
+              <WalletConnect />
+            </div>
             <p className="text-sm text-amber-900 dark:text-amber-200">
               Connect your Flare wallet to sync transactions and start generating ISO 20022 proofs
             </p>
@@ -104,8 +106,8 @@ export default function OverviewPage() {
       </div> 
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+        <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6">
+          <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
             Quick Actions
           </h2>
           <div className="space-y-3">
@@ -124,23 +126,23 @@ export default function OverviewPage() {
           </div>
         </div> 
 
-        <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+        <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6">
+          <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
             Category Breakdown
           </h2>
           <div className="space-y-3">
             {stats.topCategories.length > 0 ? (
               stats.topCategories.map((category: any, index: number) => (
                 <div key={category.name} className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className={`w-3 h-3 rounded-full ${
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <div className={`w-3 h-3 rounded-full flex-shrink-0 ${
                       index === 0 ? 'bg-green-500' : 
                       index === 1 ? 'bg-red-500' : 
                       index === 2 ? 'bg-blue-500' : 'bg-purple-500'
                     }`} />
-                    <span className="text-sm text-zinc-700 dark:text-zinc-300">{category.name}</span>
+                    <span className="text-sm text-zinc-700 dark:text-zinc-300 truncate">{category.name}</span>
                   </div>
-                  <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+                  <span className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 flex-shrink-0">
                     {category.count} transaction{category.count !== 1 ? 's' : ''}
                   </span>
                 </div>
@@ -155,13 +157,13 @@ export default function OverviewPage() {
       </div>
 
       {stats.recordedTransactions > 0 && (
-        <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
+        <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-4 sm:p-6">
+          <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-4">
             Recent Activity
           </h2>
           <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-green-500" />
+              <div className="w-3 h-3 rounded-full bg-green-500 flex-shrink-0" />
               <span className="text-sm text-green-900 dark:text-green-200">
                 ISO 20022 compliance: {stats.recordedTransactions} proof{stats.recordedTransactions !== 1 ? 's' : ''} generated
               </span>

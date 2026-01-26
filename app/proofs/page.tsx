@@ -185,15 +185,15 @@ export default function ProofsPage() {
 
       <div className="max-w-7xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
+        <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
           ISO 20022 Proofs
         </h1>
-        <p className="text-zinc-600 dark:text-zinc-400">
+        <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400">
           Manage and share your audit-grade payment records
         </p>
       </div> 
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
         <Card className="p-6">
           <div className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">
             Total Proofs
