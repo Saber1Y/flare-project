@@ -157,14 +157,14 @@ export default function ProofsPage() {
     <>
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-zinc-900 rounded-lg max-w-2xl w-full p-6">
+          <div className="bg-white dark:bg-zinc-900 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto p-4 sm:p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+              <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100">
                 Share ISO 20022 Proofs
               </h3>
               <button 
                 onClick={() => setShowModal(false)}
-                className="text-zinc-400 hover:text-zinc-600"
+                className="text-zinc-400 hover:text-zinc-600 text-xl font-bold"
               >
                 ✕
               </button>
@@ -194,20 +194,20 @@ export default function ProofsPage() {
       </div> 
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <div className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">
             Total Proofs
           </div>
-          <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+          <div className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-100">
             {proofs.length}
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <div className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">
             Anchored
           </div>
-          <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+          <div className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-100">
             {anchoredCount}
           </div>
           <div className="text-xs text-zinc-500 dark:text-zinc-500 mt-2">
@@ -215,20 +215,20 @@ export default function ProofsPage() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <div className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">
             Total Amount
           </div>
-          <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+          <div className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-100">
             {totalAmount.toFixed(2)} FLR
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <div className="text-sm font-medium text-zinc-600 dark:text-zinc-400 mb-1">
             Success Rate
           </div>
-          <div className="text-3xl font-bold text-zinc-900 dark:text-zinc-100">
+          <div className="text-2xl sm:text-3xl font-bold text-zinc-900 dark:text-zinc-100">
             {proofs.length > 0 ? Math.round((anchoredCount / proofs.length) * 100) : 0}%
           </div>
           <div className="text-xs text-zinc-500 dark:text-zinc-500 mt-2">
@@ -237,9 +237,9 @@ export default function ProofsPage() {
         </Card>
       </div>
 
-      <Card className="p-6 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100">
+      <Card className="p-4 sm:p-6 mb-6">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4">
+          <h2 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100">
             Generated Proofs
           </h2>
           <div className="flex items-center gap-2">
@@ -247,7 +247,7 @@ export default function ProofsPage() {
               placeholder="Search proofs by ID or hash..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-64"
+              className="w-full sm:w-64"
             />
             {/* <Button variant="outline" href="/transactions">
               Generate New Proof
@@ -273,21 +273,21 @@ export default function ProofsPage() {
         )}
       </Card>
 
-      <Card className="p-6 mt-6 border-2 border-dashed border-zinc-300 dark:border-zinc-700">
-        <div className="text-center py-8">
-          <HiExternalLink className="w-16 h-16 mx-auto mb-4 text-[#e51c56]" />
-          <h3 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+      <Card className="p-4 sm:p-6 mt-6 border-2 border-dashed border-zinc-300 dark:border-zinc-700">
+        <div className="text-center py-6 sm:py-8">
+          <HiExternalLink className="w-12 h-12 sm:w-16 sm:h-16 mx-auto mb-4 text-[#e51c56]" />
+          <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
             Share with Accountants
           </h3>
           <p className="text-sm text-zinc-600 dark:text-zinc-400 mb-4 max-w-md mx-auto">
             Share read-only proof links with accountants. They can verify transactions and download ISO 20022 records without needing wallet access.
           </p>
-          <div className="flex items-center gap-3 justify-center">
-            <Button variant="outline" onClick={exportAllProofs}>
+          <div className="flex flex-col sm:flex-row items-center gap-3 justify-center">
+            <Button variant="outline" onClick={exportAllProofs} className="w-full sm:w-auto">
               <HiDownload className="w-4 h-4 mr-2" />
               Export All Proofs
             </Button>
-            <Button variant="primary" onClick={showSharingGuide}>
+            <Button variant="primary" onClick={showSharingGuide} className="w-full sm:w-auto">
               <HiLink className="w-4 h-4 mr-2" />
               Sharing Guide
             </Button>
