@@ -1,18 +1,24 @@
-import { NextRequest, NextResponse } from "next/server";
-import db from "@/lib/db";
+import { NextResponse } from "next/server";
+import { db, proofs, transactions } from "@/lib/db-postgres";
+import { eq, desc } from 'drizzle-orm';
 
 export async function GET() {
   try {
-    const proofs = db.prepare(`
-      SELECT p.receiptId, p.txHash, p.status, p.createdAt, p.recordHash,
-             t.value, t.category
-      FROM proofs p
-      JOIN transactions t ON p.txHash = t.hash
-      ORDER BY p.createdAt DESC
-    `).all();
+    const allProofs = await db.select({
+      receiptId: proofs.receiptId,
+      txHash: proofs.txHash,
+      status: proofs.status,
+      createdAt: proofs.createdAt,
+      recordHash: proofs.recordHash,
+      value: transactions.value,
+      category: transactions.category
+    })
+    .from(proofs)
+    .leftJoin(transactions, eq(proofs.txHash, transactions.hash))
+    .orderBy(desc(proofs.createdAt));
 
     // Format data
-    const formattedProofs = proofs.map((proof: any) => ({
+    const formattedProofs = allProofs.map((proof: any) => ({
       receiptId: proof.receiptId,
       txHash: proof.txHash,
       amount: `${proof.value} FLR`,

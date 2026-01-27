@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getTransactionByHash, upsertProof, markProofAsAnchored } from "@/lib/db";
+import { getTransactionByHash, upsertProof, markProofAsAnchored } from "@/lib/db-operations";
 import ProofRails from "@proofrails/sdk";
-import db from "@/lib/db";
+import { eq } from 'drizzle-orm';
+import { db, transactions } from '@/lib/db-postgres';
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get transaction from DB
-    const tx = getTransactionByHash(hash);
+    const tx = await getTransactionByHash(hash);
     if (!tx) {
       return NextResponse.json(
         { error: "Transaction not found" },
@@ -37,7 +38,7 @@ export async function POST(request: NextRequest) {
     
     const proofrails = new ProofRails({
       apiKey,
-      network: tx.value > "0" ? "flare" : "coston2",
+      network: parseFloat(tx.value) > 0 ? "flare" : "coston2",
       timeout: 120000 // 2 minutes timeout
     });
 
@@ -45,8 +46,8 @@ export async function POST(request: NextRequest) {
     console.log(" Creating ISO 20022 payment receipt...");
     const receipt = await proofrails.templates.payment({
       amount: parseFloat(tx.value),
-      from: tx.from_address,
-      to: tx.to_address || "",
+      from: tx.fromAddress,
+      to: tx.toAddress || "",
       purpose: description || tx.category || "Payment",
       transactionHash: tx.hash
     });
@@ -54,26 +55,27 @@ export async function POST(request: NextRequest) {
     console.log(" ProofRails receipt created:", receipt.id, "status:", receipt.status);
 
     // Store proof in database with actual status from ProofRails
-    upsertProof({
+    await upsertProof({
       txHash: tx.hash,
       receiptId: receipt.id,
       isoType: "payment",
-      status: receipt.status || "pending",
-      createdAt: new Date().toISOString()
+      status: (receipt as any).status || "pending",
+      recordHash: (receipt as any).recordHash || null,
+      anchorTxHash: (receipt as any).anchorTx || null
     });
 
     // If anchor transaction exists, mark as anchored
-    if (receipt.anchorTx && receipt.recordHash) {
-      markProofAsAnchored(receipt.id, receipt.anchorTx, receipt.recordHash);
+    if ((receipt as any).anchorTx && (receipt as any).recordHash) {
+      await markProofAsAnchored(receipt.id, (receipt as any).anchorTx, (receipt as any).recordHash);
     }
 
     // Mark transaction as recorded
-    const markAsRecordedStmt = db.prepare(`
-      UPDATE transactions
-      SET recorded = 1, proof_id = ?
-      WHERE hash = ?
-    `);
-    markAsRecordedStmt.run(receipt.id, tx.hash);
+    await db.update(transactions)
+      .set({ 
+        recorded: true, 
+        proofId: receipt.id 
+      })
+      .where(eq(transactions.hash, tx.hash));
 
     return NextResponse.json({
       success: true,

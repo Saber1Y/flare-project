@@ -5,6 +5,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   size?: "sm" | "md" | "lg";
   children: React.ReactNode;
   className?: string;
+  href?: string;
 }
 
 export default function Button({
@@ -28,6 +29,21 @@ export default function Button({
     md: "px-6 py-2.5 text-base",
     lg: "px-8 py-3 text-lg"
   };
+
+  if (props.href) {
+    const { href: finalHref, ...buttonProps } = props;
+    const { onCopy, onClick, ...anchorProps } = buttonProps as any;
+    return (
+      <a
+        href={finalHref}
+        className={`${baseStyles} ${variantStyles[variant]} ${sizeStyles[size]} ${className}`}
+        onClick={onClick}
+        {...anchorProps}
+      >
+        {children}
+      </a>
+    );
+  }
 
   return (
     <button

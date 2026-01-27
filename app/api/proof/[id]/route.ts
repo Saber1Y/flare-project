@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getProofByReceiptId, getTransactionByHash } from "@/lib/db";
+import { getProofByReceiptId, getTransactionByHash } from "@/lib/db-operations";
 
 export async function GET(
   request: NextRequest,
@@ -16,7 +16,7 @@ export async function GET(
     }
 
     // Get proof from database
-    const proof = getProofByReceiptId(receiptId);
+    const proof = await getProofByReceiptId(receiptId);
     if (!proof) {
       return NextResponse.json(
         { error: "Proof not found" },
@@ -25,7 +25,7 @@ export async function GET(
     }
 
     // Get associated transaction
-    const transaction = getTransactionByHash(proof.txHash);
+    const transaction = await getTransactionByHash(proof.txHash);
     if (!transaction) {
       return NextResponse.json(
         { error: "Associated transaction not found" },
@@ -34,7 +34,7 @@ export async function GET(
     }
 
     // Use stored network, fallback to detection for existing data
-    const network = transaction.network || (transaction.value > "0" ? "flare" : "coston2");
+    const network = transaction.network || (parseFloat(transaction.value) > 0 ? "flare" : "coston2");
 
     return NextResponse.json({
       success: true,
@@ -47,11 +47,11 @@ export async function GET(
         recordHash: proof.recordHash,
         network: network,
         amount: `${transaction.value} FLR`,
-        from: transaction.from_address,
-        to: transaction.to_address || "",
+        from: transaction.fromAddress,
+        to: transaction.toAddress || "",
         purpose: transaction.category || "uncategorized",
         transactionHash: transaction.hash,
-        blockNumber: transaction.block_number,
+        blockNumber: transaction.blockNumber,
         timestamp: transaction.timestamp
       }
     });

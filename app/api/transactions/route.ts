@@ -26,12 +26,15 @@ export async function GET(request: NextRequest) {
       await upsertTransaction({
         hash: tx.hash,
         fromAddress: tx.from,
-        toAddress: tx.to,
+        toAddress: tx.to || null,
         value: tx.value,
         blockNumber: Number(tx.blockNumber),
         timestamp: tx.timestamp,
         category: "uncategorized",
         recorded: false,
+        gasUsed: tx.gasUsed ? tx.gasUsed.toString() : null,
+        gasPrice: tx.gasPrice ? tx.gasPrice.toString() : null,
+        proofId: null,
         network: testnet ? "coston2" : "flare"
       });
     }

@@ -40,7 +40,14 @@ export async function getTransactionsByWallet(walletAddress: string): Promise<Tr
     .orderBy(desc(transactions.blockNumber))
     .limit(100);
   
-  return result;
+  return result.map(tx => ({
+    ...tx,
+    gasUsed: tx.gasUsed || null,
+    gasPrice: tx.gasPrice || null,
+    category: tx.category || null,
+    proofId: tx.proofId || null,
+    network: tx.network || null
+  }));
 }
 
 export async function updateTransactionCategory(hash: string, category: string) {
@@ -68,7 +75,7 @@ export async function getTransactionByHash(hash: string): Promise<Transaction | 
     .where(eq(transactions.hash, hash))
     .limit(1);
   
-  return result[0];
+  return result[0] || undefined;
 }
 
 // Proof operations
@@ -109,7 +116,15 @@ export async function getProofByReceiptId(receiptId: string): Promise<Proof | un
     .orderBy(desc(proofs.createdAt))
     .limit(1);
   
-  return result[0];
+  const proof = result[0];
+  if (!proof) return undefined;
+  
+  return {
+    ...proof,
+    isoType: proof.isoType || null,
+    recordHash: proof.recordHash || null,
+    anchorTxHash: proof.anchorTxHash || null
+  };
 }
 
 export async function markProofAsAnchored(receiptId: string, anchorTxHash: string, recordHash: string) {

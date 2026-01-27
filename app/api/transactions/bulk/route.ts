@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { updateTransactionCategory } from "@/lib/db";
+import { updateTransactionCategory } from "@/lib/db-operations";
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
     // Update all transactions
     for (const hash of hashes) {
-      updateTransactionCategory(hash, category);
+      await updateTransactionCategory(hash, category);
     }
 
     return NextResponse.json({

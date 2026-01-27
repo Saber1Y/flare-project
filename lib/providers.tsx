@@ -2,7 +2,7 @@
 
 import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { wagmiConfig } from './wagmi'
+import { wagmiConfig, flare, flareTestnet } from './wagmi'
 import { AppKitProvider } from '@reown/appkit/react'
 
 let queryClient: QueryClient;
@@ -20,7 +20,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <WagmiProvider config={wagmiConfig} reconnectOnMount={true}>
       <QueryClientProvider client={queryClient}>
-        <AppKitProvider>
+        <AppKitProvider projectId="2cc0cd91791d512142b9f3bae0a9e361" networks={[flareTestnet, flare]}>
           {children}
         </AppKitProvider>
       </QueryClientProvider>

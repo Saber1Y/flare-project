@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getProofByReceiptId, markProofAsAnchored } from "@/lib/db";
+import { getProofByReceiptId, markProofAsAnchored } from "@/lib/db-operations";
 import ProofRails from "@proofrails/sdk";
-import db from "@/lib/db";
+import { eq } from 'drizzle-orm';
+import { db, proofs } from '@/lib/db-postgres';
 
 export async function POST(
   request: NextRequest
@@ -18,7 +19,7 @@ export async function POST(
     }
 
     // Get existing proof from database
-    const proof = getProofByReceiptId(receiptId);
+    const proof = await getProofByReceiptId(receiptId);
     if (!proof) {
       return NextResponse.json(
         { error: "Proof not found" },
@@ -58,17 +59,14 @@ export async function POST(
       if (actualStatus === 'anchored' && (receipt.bundleHash || receipt.xmlUrl)) {
         // Use the original transaction hash as the anchor (since this is anchored on Flare)
         const anchorTx = proof.txHash; // The original transaction IS the anchor
-        const recordHash = receipt.bundleHash || receipt.recordHash;
-        markProofAsAnchored(receiptId, anchorTx, recordHash);
+        const recordHash = (receipt as any).bundleHash || (receipt as any).recordHash;
+        await markProofAsAnchored(receiptId, anchorTx, recordHash);
         console.log("Proof marked as anchored with anchor tx:", anchorTx, "record hash:", recordHash);
       } else {
         // Update status if not anchored yet
-        const updateStmt = db.prepare(`
-          UPDATE proofs 
-          SET status = ?
-          WHERE receiptId = ?
-        `);
-        updateStmt.run(actualStatus, receiptId);
+        await db.update(proofs)
+          .set({ status: actualStatus })
+          .where(eq(proofs.receiptId, receiptId));
         console.log("Proof status updated to:", actualStatus);
       }
       updated = true;
@@ -79,7 +77,7 @@ export async function POST(
       updated,
       currentStatus: actualStatus,
       anchorTx: receipt.anchorTx,
-      recordHash: receipt.recordHash || receipt.bundleHash,
+      recordHash: (receipt as any).recordHash || (receipt as any).bundleHash,
       bundleUrl: receipt.bundleUrl,
       xmlUrl: receipt.xmlUrl
     });

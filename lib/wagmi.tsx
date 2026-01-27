@@ -33,7 +33,7 @@ export const flareTestnet = {
   testnet: true,
 }
 
-const networks = [flare, flareTestnet]
+const networks = [flareTestnet, flare]
 
 const wagmiAdapter = new WagmiAdapter({
   networks,
@@ -43,7 +43,7 @@ const wagmiAdapter = new WagmiAdapter({
 
 createAppKit({
   adapters: [wagmiAdapter],
-  networks,
+  networks: [flareTestnet],
   projectId,
   metadata: {
     name: 'Flare Accounting',

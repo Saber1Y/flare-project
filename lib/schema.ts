@@ -36,27 +36,27 @@ export interface Transaction {
   id?: number;
   hash: string;
   fromAddress: string;
-  toAddress?: string;
+  toAddress: string | null;
   value: string;
   blockNumber: number;
   timestamp: number;
-  gasUsed?: string;
-  gasPrice?: string;
-  category: string;
-  recorded: boolean;
-  proofId?: string;
-  network?: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  gasUsed: string | null;
+  gasPrice: string | null;
+  category: string | null;
+  recorded: boolean | null;
+  proofId: string | null;
+  network: string | null;
+  createdAt: Date | null;
+  updatedAt: Date | null;
 }
 
 export interface Proof {
   id?: number;
   txHash: string;
   receiptId: string;
-  isoType?: string;
-  recordHash?: string;
-  anchorTxHash?: string;
-  status: string;
-  createdAt?: Date;
+  isoType: string | null;
+  recordHash: string | null;
+  anchorTxHash: string | null;
+  status: string | null;
+  createdAt: Date | null;
 }

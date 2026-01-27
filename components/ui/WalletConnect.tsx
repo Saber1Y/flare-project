@@ -11,7 +11,7 @@ export default function WalletConnect() {
   if (isConnected) {
     return (
       <button
-        onClick={() => open({ view: "Networks/" })}
+        onClick={() => open({ view: "Networks" })}
         className="bg-[#e51c56] text-white px-4 py-2 rounded-full font-semibold shadow hover:bg-[#d41848] transition-colors"
       >
         {address?.slice(0, 6)}...{address?.slice(-4)}
