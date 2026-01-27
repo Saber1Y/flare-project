@@ -40,14 +40,14 @@ export async function POST(
       timeout: 30000 // 30 seconds timeout
     });
 
-    // Store proof data for later use
+    
     const proofData = proof;
 
-    // Get latest receipt status from ProofRails
+
     const receipt = await proofrails.receipts.get(receiptId);
     console.log("Receipt status from ProofRails:", receipt.status);
 
-    // Workaround: Treat receipts with bundleHash/xmlUrl as successful (SDK bug)
+   
     const actualStatus = (receipt.bundleHash || receipt.xmlUrl) ? "anchored" : receipt.status;
     console.log("Actual status (working around SDK bug):", actualStatus);
 

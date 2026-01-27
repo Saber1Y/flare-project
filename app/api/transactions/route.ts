@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { upsertTransaction, getTransactionsByWallet, updateTransactionCategory } from "@/lib/db";
+import { upsertTransaction, getTransactionsByWallet, updateTransactionCategory } from "@/lib/db-operations";
 import { fetchTransactions } from "@/lib/flare-rpc";
 
 export async function GET(request: NextRequest) {
@@ -23,12 +23,12 @@ export async function GET(request: NextRequest) {
 
     // Store/Update in DB
     for (const tx of newTxs) {
-      upsertTransaction({
+      await upsertTransaction({
         hash: tx.hash,
-        from_address: tx.from,
-        to_address: tx.to,
+        fromAddress: tx.from,
+        toAddress: tx.to,
         value: tx.value,
-        block_number: Number(tx.blockNumber),
+        blockNumber: Number(tx.blockNumber),
         timestamp: tx.timestamp,
         category: "uncategorized",
         recorded: false,
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     console.log(`Fetched ${newTxs.length} new transactions from RPC`)
     
     // Get updated list from DB
-    const allTxs = getTransactionsByWallet(wallet);
+    const allTxs = await getTransactionsByWallet(wallet);
     console.log(`Total transactions in DB: ${allTxs.length}`)
 
     return NextResponse.json({
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update transaction category
-    updateTransactionCategory(hash, category);
+    await updateTransactionCategory(hash, category);
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
