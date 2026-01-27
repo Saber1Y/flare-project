@@ -1,6 +1,9 @@
 import { eq, and, desc, or } from 'drizzle-orm';
-import { db } from './db-postgres';
+import { db, runMigrations } from './db-postgres';
 import { transactions, proofs, type Transaction, type Proof } from './schema';
+
+// Initialize database with migrations
+runMigrations();
 
 // Transaction operations
 export async function upsertTransaction(tx: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'>) {
