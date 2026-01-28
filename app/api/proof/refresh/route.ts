@@ -38,7 +38,7 @@ export async function POST(
 
     const proofrails = new ProofRails({
       apiKey,
-      timeout: 30000 // 30 seconds timeout
+      timeout: 300000 // 5 minutes timeout for anchoring
     });
 
     

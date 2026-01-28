@@ -24,6 +24,7 @@ export default function TransactionsPage() {
   const [selectedTxForProof, setSelectedTxForProof] = useState<any>(null);
   const [proofDescription, setProofDescription] = useState("");
   const [generatingProof, setGeneratingProof] = useState(false);
+  const [generatingTxHash, setGeneratingTxHash] = useState<string | null>(null);
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -90,6 +91,7 @@ export default function TransactionsPage() {
   const generateProof = async (tx: any) => {
     console.log("generateProof function called with tx:", tx);
     setGeneratingProof(true);
+    setGeneratingTxHash(tx.hash);
     try {
       const requestBody = {
         hash: tx.hash,
@@ -118,7 +120,7 @@ export default function TransactionsPage() {
         // Update transaction to recorded state
         setTransactions((txs) =>
           txs.map((t) =>
-            t.hash === tx.hash ? { ...t, recorded: true, proof_id: data.receipt.id } : t
+            t.hash === tx.hash ? { ...t, recorded: true, proofId: data.receipt.id } : t
           )
         );
         setGenerateModalOpen(false);
@@ -132,6 +134,7 @@ export default function TransactionsPage() {
       }
     } finally {
       setGeneratingProof(false);
+      setGeneratingTxHash(null);
     }
   };
 
@@ -181,8 +184,8 @@ export default function TransactionsPage() {
     const headers = 'Hash,From,To,Value,Category,Date';
     const rows = selectedTxs.map(tx => [
         tx.hash,
-        tx.from_address,
-        tx.to_address || '',
+        tx.fromAddress,
+        tx.toAddress || '',
         tx.value,
         tx.category,
         new Date(tx.timestamp * 1000).toLocaleDateString()
@@ -205,8 +208,8 @@ export default function TransactionsPage() {
     const matchesSearch =
       !searchQuery ||
       tx.hash.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tx.from_address.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      tx.to_address?.toLowerCase().includes(searchQuery.toLowerCase());
+      tx.fromAddress.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      tx.toAddress?.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
@@ -289,13 +292,21 @@ export default function TransactionsPage() {
               // Call generateProof directly
               generateProof(tx);
             }}
+            disabled={generatingTxHash === tx.hash}
           >
-            Generate Record
+            {generatingTxHash === tx.hash ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full"></div>
+                Generating...
+              </div>
+            ) : (
+              "Generate Record"
+            )}
           </Button>
         )}
-        {tx.recorded && tx.proof_id && (
+        {tx.recorded && tx.proofId && (
           <a
-            href={`/proof/${tx.proof_id}`}
+            href={`/proof/${tx.proofId}`}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -473,7 +484,7 @@ export default function TransactionsPage() {
       {transactions.length === 0 && !loading && walletAddress && (
         <div className="bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 p-6 sm:p-12 text-center">
           <p className="text-sm sm:text-base text-zinc-600 dark:text-zinc-400 mb-4">
-            Enter a wallet address above and click "Fetch Transactions" to get started
+            Enter a wallet address above and click &apos;Fetch Transactions&apos; to get started
           </p>
           <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-500">
             We&apos;ll fetch all transactions involving that wallet

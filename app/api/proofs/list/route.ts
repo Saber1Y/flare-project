@@ -2,21 +2,25 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { proofs, transactions } from "@/lib/schema";
 import { eq, desc } from 'drizzle-orm';
+import { withTimeout, handleDbError } from "@/lib/error-handlers";
 
 export async function GET() {
   try {
-    const allProofs = await db.select({
-      receiptId: proofs.receiptId,
-      txHash: proofs.txHash,
-      status: proofs.status,
-      createdAt: proofs.createdAt,
-      recordHash: proofs.recordHash,
-      value: transactions.value,
-      category: transactions.category
-    })
-    .from(proofs)
-    .leftJoin(transactions, eq(proofs.txHash, transactions.hash))
-    .orderBy(desc(proofs.createdAt));
+    const allProofs = await withTimeout(
+      db.select({
+        receiptId: proofs.receiptId,
+        txHash: proofs.txHash,
+        status: proofs.status,
+        createdAt: proofs.createdAt,
+        recordHash: proofs.recordHash,
+        value: transactions.value,
+        category: transactions.category
+      })
+      .from(proofs)
+      .leftJoin(transactions, eq(proofs.txHash, transactions.hash))
+      .orderBy(desc(proofs.createdAt)),
+      15000 // 15 second timeout
+    );
 
     // Format data
     const formattedProofs = allProofs.map((proof: any) => ({
@@ -36,10 +40,6 @@ export async function GET() {
     });
 
   } catch (error: any) {
-    console.error("Error fetching proofs:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch proofs", details: error.message },
-      { status: 500 }
-    );
+    return handleDbError(error, "fetching proofs");
   }
 }

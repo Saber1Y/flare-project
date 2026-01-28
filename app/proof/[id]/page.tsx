@@ -66,6 +66,33 @@ export default function ProofPage() {
     }
   }, [receiptId]);
 
+  // Poll for status updates if proof is pending
+  useEffect(() => {
+    if (!proofData || proofData.status !== 'pending') return;
+    
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch('/api/proof/refresh', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ receiptId })
+        });
+        
+        if (res.ok) {
+          const refreshData = await res.json();
+          if (refreshData.currentStatus && refreshData.currentStatus !== 'pending') {
+            // Status changed, refetch full proof data
+            fetchProofData(true);
+          }
+        }
+      } catch (error) {
+        console.error("Error polling status:", error);
+      }
+    }, 30000); // Check every 30 seconds
+
+    return () => clearInterval(interval);
+  }, [receiptId, proofData?.status]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex items-center justify-center">
