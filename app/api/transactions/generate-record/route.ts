@@ -69,13 +69,13 @@ export async function POST(request: NextRequest) {
       await markProofAsAnchored(receipt.id, (receipt as any).anchorTx, (receipt as any).recordHash);
     }
 
-    // Mark transaction as recorded
-    await db.update(transactions)
-      .set({ 
-        recorded: true, 
-        proofId: receipt.id 
-      })
-      .where(eq(transactions.hash, tx.hash));
+// Mark transaction as recorded
+     await db.update(transactions)
+       .set({ 
+         recorded: true, 
+         proof_id: receipt.id 
+       })
+       .where(eq(transactions.hash, tx.hash));
 
     return NextResponse.json({
       success: true,

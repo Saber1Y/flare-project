@@ -28,13 +28,13 @@ export async function GET(request: NextRequest) {
         fromAddress: tx.from,
         toAddress: tx.to || null,
         value: tx.value,
-        blockNumber: Number(tx.blockNumber),
+        block_number: Number(tx.blockNumber),
         timestamp: tx.timestamp,
         category: "uncategorized",
         recorded: false,
-        gasUsed: tx.gasUsed ? tx.gasUsed.toString() : null,
-        gasPrice: tx.gasPrice ? tx.gasPrice.toString() : null,
-        proofId: null,
+        gas_used: tx.gasUsed ? tx.gasUsed.toString() : null,
+        gas_price: tx.gasPrice ? tx.gasPrice.toString() : null,
+        proof_id: null,
         network: testnet ? "coston2" : "flare"
       });
     }

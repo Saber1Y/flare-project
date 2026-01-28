@@ -1,9 +1,6 @@
 import { eq, and, desc, or } from 'drizzle-orm';
-import { db, runMigrations } from './db-postgres';
-import { transactions, proofs, type Transaction, type Proof } from './schema';
-
-// Initialize database with migrations
-runMigrations();
+import { db } from './db-postgres';
+import { transactions, proofs, type Transaction, type Proof, mapDbToAppTransaction, mapDbToAppProof } from './schema';
 
 // Transaction operations
 export async function upsertTransaction(tx: Omit<Transaction, 'id' | 'createdAt' | 'updatedAt'>) {
@@ -36,28 +33,21 @@ export async function getTransactionsByWallet(walletAddress: string): Promise<Tr
     .from(transactions)
     .where(
       or(
-        eq(transactions.fromAddress, walletAddress.toLowerCase()),
-        eq(transactions.toAddress, walletAddress.toLowerCase())
+        eq(transactions.from_address, walletAddress.toLowerCase()),
+        eq(transactions.to_address, walletAddress.toLowerCase())
       )
     )
-    .orderBy(desc(transactions.blockNumber))
+    .orderBy(desc(transactions.block_number))
     .limit(100);
   
-  return result.map(tx => ({
-    ...tx,
-    gasUsed: tx.gasUsed || null,
-    gasPrice: tx.gasPrice || null,
-    category: tx.category || null,
-    proofId: tx.proofId || null,
-    network: tx.network || null
-  }));
+  return result.map(mapDbToAppTransaction);
 }
 
 export async function updateTransactionCategory(hash: string, category: string) {
   return await db.update(transactions)
     .set({
       category,
-      updatedAt: new Date()
+      updated_at: new Date()
     })
     .where(eq(transactions.hash, hash));
 }
@@ -66,8 +56,8 @@ export async function markAsRecorded(hash: string, proofId: string) {
   return await db.update(transactions)
     .set({
       recorded: true,
-      proofId,
-      updatedAt: new Date()
+      proof_id: proofId,
+      updated_at: new Date()
     })
     .where(eq(transactions.hash, hash));
 }
@@ -78,66 +68,64 @@ export async function getTransactionByHash(hash: string): Promise<Transaction | 
     .where(eq(transactions.hash, hash))
     .limit(1);
   
-  return result[0] || undefined;
+  const tx = result[0];
+  return tx ? mapDbToAppTransaction(tx) : undefined;
 }
 
 // Proof operations
 export async function upsertProof(proof: Omit<Proof, 'id' | 'createdAt'>) {
   const existingProof = await db.select()
     .from(proofs)
-    .where(eq(proofs.txHash, proof.txHash))
+    .where(eq(proofs.tx_hash, proof.txHash))
     .limit(1);
-
+ 
   if (existingProof.length > 0) {
     // Update existing proof
     return await db.update(proofs)
       .set(proof)
-      .where(eq(proofs.txHash, proof.txHash));
+      .where(eq(proofs.tx_hash, proof.txHash));
   } else {
     // Insert new proof
     return await db.insert(proofs)
-      .values({
-        ...proof,
-        createdAt: new Date()
-      });
+      .values(proof);
   }
+}
 }
 
 export async function getProofByTxHash(txHash: string): Promise<Proof | undefined> {
   const result = await db.select()
     .from(proofs)
-    .where(eq(proofs.txHash, txHash))
-    .limit(1);
-  
-  return result[0];
-}
-
-export async function getProofByReceiptId(receiptId: string): Promise<Proof | undefined> {
-  const result = await db.select()
-    .from(proofs)
-    .where(eq(proofs.receiptId, receiptId))
-    .orderBy(desc(proofs.createdAt))
+    .where(eq(proofs.tx_hash, txHash))
     .limit(1);
   
   const proof = result[0];
   if (!proof) return undefined;
   
-  return {
-    ...proof,
-    isoType: proof.isoType || null,
-    recordHash: proof.recordHash || null,
-    anchorTxHash: proof.anchorTxHash || null
-  };
+  return mapDbToAppProof(proof);
+}
+
+export async function getProofByReceiptId(receiptId: string): Promise<Proof | undefined> {
+  const result = await db.select()
+    .from(proofs)
+    .where(eq(proofs.receipt_id, receiptId))
+    .orderBy(desc(proofs.created_at))
+    .limit(1);
+  
+  const proof = result[0];
+  if (!proof) return undefined;
+  
+  return mapDbToAppProof(proof);
 }
 
 export async function markProofAsAnchored(receiptId: string, anchorTxHash: string, recordHash: string) {
   return await db.update(proofs)
     .set({
       status: 'anchored',
-      anchorTxHash,
-      recordHash
+      anchor_tx_hash: anchorTxHash,
+      record_hash: recordHash,
+      updated_at: new Date()
     })
-    .where(eq(proofs.receiptId, receiptId));
+    .where(eq(proofs.receipt_id, receiptId));
 }
 
 // Stats operations

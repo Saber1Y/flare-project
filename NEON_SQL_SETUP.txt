@@ -1,0 +1,69 @@
+# 🎯 NEON SQL CONSOLE - COPY PASTE THIS ENTIRE FILE
+
+# ===============================
+# FLARE DATABASE SETUP SCRIPT
+# ===============================
+
+# 1. Click "SQL Editor" in Neon Dashboard
+# 2. Delete everything in the editor 
+# 3. Copy ALL text below (from line 8 onwards)
+# 4. Paste into Neon SQL Editor
+# 5. Click "Run query" button (▶️)
+# 6. Wait for completion message
+# 7. Test your app locally: npm run dev
+
+# ===============================
+# START COPYING FROM HERE 👇
+# ===============================
+
+-- Drop existing tables first (clean slate)
+DROP TABLE IF EXISTS transactions CASCADE;
+DROP TABLE IF EXISTS proofs CASCADE;
+
+-- Create transactions table
+CREATE TABLE transactions (
+  id SERIAL PRIMARY KEY,
+  hash TEXT UNIQUE NOT NULL,
+  from_address TEXT NOT NULL,
+  to_address TEXT,
+  value TEXT NOT NULL,
+  block_number INTEGER NOT NULL,
+  timestamp INTEGER NOT NULL,
+  gas_used TEXT,
+  gas_price TEXT,
+  category TEXT DEFAULT 'uncategorized',
+  recorded BOOLEAN DEFAULT false,
+  proof_id TEXT,
+  network TEXT DEFAULT 'coston2',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create proofs table  
+CREATE TABLE proofs (
+  id SERIAL PRIMARY KEY,
+  tx_hash TEXT NOT NULL,
+  receipt_id TEXT NOT NULL,
+  iso_type TEXT DEFAULT 'payment',
+  record_hash TEXT,
+  anchor_tx_hash TEXT,
+  status TEXT DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create indexes for performance
+CREATE INDEX idx_from_address ON transactions(from_address);
+CREATE INDEX idx_to_address ON transactions(to_address);
+CREATE INDEX idx_hash ON transactions(hash);
+CREATE INDEX idx_category ON transactions(category);
+
+-- ===============================
+# INSTRUCTIONS:
+# 1. Go to Neon Dashboard
+# 2. Click "SQL Editor" tab
+# 3. Paste everything above into the editor
+# 4. Click "Run query" (▶️ button)
+# 5. Wait for "Query completed successfully" message
+# 6. Return to your app: npm run dev
+# 7. Test with wallet address
+# ===============================
