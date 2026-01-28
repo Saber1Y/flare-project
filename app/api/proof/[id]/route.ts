@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getProofByReceiptId, getTransactionByHash } from "@/lib/db-operations";
+import { getProofByReceiptId } from "@/lib/proofs";
+import { getTransactionByHash } from "@/lib/transactions";
 
 export async function GET(
   request: NextRequest,

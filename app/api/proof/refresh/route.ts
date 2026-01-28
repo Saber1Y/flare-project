@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getProofByReceiptId, markProofAsAnchored } from "@/lib/db-operations";
+import { getProofByReceiptId } from "@/lib/proofs";
+import { markProofAsAnchored } from "@/lib/proofs";
+import { updateProofStatus } from "@/lib/proofs";
 import ProofRails from "@proofrails/sdk";
-import { eq } from 'drizzle-orm';
-import { db, proofs } from '@/lib/db-postgres';
 
 export async function POST(
   request: NextRequest
@@ -64,9 +64,7 @@ export async function POST(
         console.log("Proof marked as anchored with anchor tx:", anchorTx, "record hash:", recordHash);
       } else {
         // Update status if not anchored yet
-        await db.update(proofs)
-          .set({ status: actualStatus })
-          .where(eq(proofs.receiptId, receiptId));
+        await updateProofStatus(receiptId, actualStatus);
         console.log("Proof status updated to:", actualStatus);
       }
       updated = true;

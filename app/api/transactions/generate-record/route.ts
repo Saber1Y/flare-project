@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getTransactionByHash, upsertProof, markProofAsAnchored } from "@/lib/db-operations";
+import { getTransactionByHash } from "@/lib/transactions";
+import { upsertProof, markProofAsAnchored } from "@/lib/proofs";
+import { markAsRecorded } from "@/lib/transactions";
 import ProofRails from "@proofrails/sdk";
-import { eq } from 'drizzle-orm';
-import { db, transactions } from '@/lib/db-postgres';
 
 export async function POST(request: NextRequest) {
   try {
@@ -69,13 +69,8 @@ export async function POST(request: NextRequest) {
       await markProofAsAnchored(receipt.id, (receipt as any).anchorTx, (receipt as any).recordHash);
     }
 
-// Mark transaction as recorded
-     await db.update(transactions)
-       .set({ 
-         recorded: true, 
-         proof_id: receipt.id 
-       })
-       .where(eq(transactions.hash, tx.hash));
+ // Mark transaction as recorded
+     await markAsRecorded(tx.hash, receipt.id);
 
     return NextResponse.json({
       success: true,

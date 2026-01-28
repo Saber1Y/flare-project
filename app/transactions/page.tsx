@@ -247,12 +247,12 @@ export default function TransactionsPage() {
     date: new Date(tx.timestamp * 1000).toLocaleDateString(),
     from: (
       <code className="text-xs bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded text-zinc-600 dark:text-zinc-400">
-        {tx.from_address.slice(0, 8)}...{tx.from_address.slice(-6)}
+        {tx.fromAddress?.slice(0, 8)}...{tx.fromAddress?.slice(-6)}
       </code>
     ),
-    to: tx.to_address ? (
+    to: tx.toAddress ? (
       <code className="text-xs bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded text-zinc-600 dark:text-zinc-400">
-        {tx.to_address.slice(0, 8)}...{tx.to_address.slice(-6)}
+        {tx.toAddress.slice(0, 8)}...{tx.toAddress.slice(-6)}
       </code>
     ) : (
       "-"

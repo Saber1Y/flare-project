@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { db, proofs, transactions } from "@/lib/db-postgres";
+import { db } from "@/lib/db";
+import { proofs, transactions } from "@/lib/schema";
 import { eq, desc } from 'drizzle-orm';
 
 export async function GET() {

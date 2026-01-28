@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { upsertTransaction, getTransactionsByWallet, updateTransactionCategory } from "@/lib/db-operations";
+import { upsertTransaction, getTransactionsByWallet, updateTransactionCategory } from "@/lib/transactions";
 import { fetchTransactions } from "@/lib/flare-rpc";
 
 export async function GET(request: NextRequest) {
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
 
   try {
     // First, try to fetch existing transactions from DB
-    const existingTxs = getTransactionsByWallet(wallet);
+    const existingTxs = await getTransactionsByWallet(wallet);
 
     // Fetch new transactions from Flare RPC
     const newTxs = await fetchTransactions(wallet, testnet);
@@ -28,13 +28,13 @@ export async function GET(request: NextRequest) {
         fromAddress: tx.from,
         toAddress: tx.to || null,
         value: tx.value,
-        block_number: Number(tx.blockNumber),
+        blockNumber: Number(tx.blockNumber),
         timestamp: tx.timestamp,
         category: "uncategorized",
         recorded: false,
-        gas_used: tx.gasUsed ? tx.gasUsed.toString() : null,
-        gas_price: tx.gasPrice ? tx.gasPrice.toString() : null,
-        proof_id: null,
+        gasUsed: tx.gasUsed ? tx.gasUsed.toString() : null,
+        gasPrice: tx.gasPrice ? tx.gasPrice.toString() : null,
+        proofId: null,
         network: testnet ? "coston2" : "flare"
       });
     }

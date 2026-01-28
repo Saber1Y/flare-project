@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { updateTransactionCategory } from "@/lib/db-operations";
+import { updateTransactionCategory } from "@/lib/transactions";
 
 export async function POST(request: NextRequest) {
   try {
