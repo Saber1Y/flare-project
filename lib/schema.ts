@@ -1,4 +1,5 @@
 import { pgTable, text, integer, boolean, timestamp, serial } from 'drizzle-orm/pg-core';
+import { InferSelectModel, InferInsertModel } from 'drizzle-orm';
 
 // Transactions table
 export const transactions = pgTable('transactions', {
@@ -31,7 +32,7 @@ export const proofs = pgTable('proofs', {
   createdAt: timestamp('created_at').defaultNow()
 });
 
-export type Transaction = typeof transactions.$Select;
-export type NewTransaction = typeof transactions.$Insert;
-export type Proof = typeof proofs.$Select;
-export type NewProof = typeof proofs.$Insert;
+export type Transaction = InferSelectModel<typeof transactions>;
+export type NewTransaction = InferInsertModel<typeof transactions>;
+export type Proof = InferSelectModel<typeof proofs>;
+export type NewProof = InferInsertModel<typeof proofs>;
